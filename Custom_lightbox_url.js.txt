@@ -1,0 +1,38 @@
+document.addEventListener("DOMContentLoaded", function() {
+  function updateURL(lightbox) {
+    if (lightbox.classList.contains("lightbox-is-open")) {
+      const productId = lightbox.querySelector(".ProductItem").dataset.itemId;
+      const customURL = window.location.href.split("?")[0] + "?product=" + encodeURIComponent(productId);
+      window.history.pushState({}, "", customURL);
+    } else {
+      const originalURL = window.location.href.split("?")[0];
+      window.history.pushState({}, "", originalURL);
+    }
+  }
+
+  function openLightboxFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get("product");
+
+    if (productId) {
+      const productItem = document.querySelector(`[data-item-id="${productId}"]`);
+      if (productItem) {
+        productItem.querySelector(".product-image").click();
+      }
+    }
+  }
+
+  const observer = new MutationObserver(function(mutationsList) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === "attributes" && mutation.attributeName === "class") {
+        updateURL(mutation.target);
+      }
+    }
+  });
+
+  const lightbox = document.querySelector(".sqs-lightbox");
+  if (lightbox) {
+    observer.observe(lightbox, { attributes: true });
+    openLightboxFromURL();
+  }
+});
